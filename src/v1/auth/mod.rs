@@ -2,6 +2,7 @@ mod jwt;
 mod models;
 mod password;
 
+use actix_easy_multipart::MultipartForm;
 use actix_web::guard::GuardContext;
 use actix_web::web::Form;
 use actix_web::{web, Scope, Responder, HttpResponse, post};
@@ -20,7 +21,7 @@ async fn sign_up(dynamo_client: web::Data<Client>, data: web::Json<models::SignU
 }
 
 #[post("/sign_in")]
-async fn sign_in(dynamo_client: web::Data<Client>, data: web::Json<models::SignUp>) -> impl Responder {
+async fn sign_in(dynamo_client: web::Data<Client>, data: MultipartForm<models::SignIn>) -> impl Responder {
     let user = dynamo_client.get(&USER_TABLE, "email", &data.email).await;
     match user {
         Some(user) if password::verify(&data.password, &user.password_hash) => {

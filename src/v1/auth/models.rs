@@ -1,3 +1,4 @@
+use actix_easy_multipart::{MultipartForm, text::Text};
 use serde::{Serialize, Deserialize};
 
 
@@ -5,6 +6,12 @@ use serde::{Serialize, Deserialize};
 pub struct SignUp {
     pub email: String,
     pub password: String,
+}
+
+#[derive(MultipartForm)]
+pub struct SignIn {
+    pub email: Text<String>,
+    pub password: Text<String>,
 }
 
 #[derive(Deserialize, Serialize)]

@@ -3,8 +3,8 @@ name: Deploy Dev
 on:
   push:
     paths:
-      - 'rust_serverless_backend/target/lambda/rust_serverless_backend/**'
-      - 'rust_serverless_backend/deploy/**'
+      - '/target/lambda/rust_serverless_backend/**'
+      - '/deploy/**'
 
 jobs:
   job1:

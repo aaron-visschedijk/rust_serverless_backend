@@ -8,7 +8,7 @@ env:
   AWS_DEFAULT_REGION: eu-central-1
 
 jobs:
-  build-lambda-package:
+  upload-lambda:
     runs-on: ubuntu-latest
 
     steps:
@@ -18,3 +18,34 @@ jobs:
         run: |
           pip install awscli
           aws s3 sync --delete ./target/lambda/rust-serverless-backend s3://rust-serverless-backend-lambdas/${{ github.event.repository.name }}/
+      
+  terraform:
+    needs: upload-lambda
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+      - name: Setup Terraform CLI
+        uses: hashicorp/setup-terraform@v2
+        with:
+          cli_config_credentials_token: ${{ secrets.TF_API_TOKEN }}
+      - name: Terraform Init
+        id: init
+        run: |
+          cd deploy
+          terraform init
+      - name: Terraform Plan
+        id: plan
+        run: |
+          cd deploy
+          terraform plan \
+          -var 'build_tag=${{ github.sha }}' \
+          -var 'project_name=${{ github.event.repository.name }}'
+      - name: Terraform Apply
+        id: apply
+        run: |
+          cd deploy
+          terraform apply -auto-approve \
+          -var 'build_tag=${{ github.sha }}' \
+          -var 'project_name=${{ github.event.repository.name }}'

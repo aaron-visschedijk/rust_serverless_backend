@@ -4,10 +4,10 @@ on:
   [push]
 
 jobs:
-  upload-lambda-package:
+  test_cd:
     
     runs-on: ubuntu-latest
     steps:
       - name: Package Lambda and Requirements
         run: |
-          echo "${{ github.event_name }}"
+          echo "${{ github.event }}"

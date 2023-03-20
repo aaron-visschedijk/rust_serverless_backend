@@ -1,9 +1,7 @@
-use std::{collections::HashMap};
+use std::collections::HashMap;
 use serde::{Serialize, Deserialize};
 use serde_dynamo;
-use aws_sdk_dynamodb::{
-    model::AttributeValue,
-};
+use aws_sdk_dynamodb::model::AttributeValue;
 use aws_config;
 
 use self::tables::Table;
@@ -12,6 +10,7 @@ use self::tables::Table;
 pub mod models;
 pub mod tables;
 
+#[derive(Clone)]
 pub struct Client {
     client: aws_sdk_dynamodb::Client,
 }
@@ -74,7 +73,7 @@ impl Client {
             .send()
             .await;
         
-        for item in query_result.unwrap().items.unwrap() {
+        for item in query_result.ok()?.items? {
             let serialized: T = serde_dynamo::from_item(item).unwrap();
             return Some(serialized);
         }

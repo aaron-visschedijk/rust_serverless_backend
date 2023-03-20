@@ -1,35 +1,20 @@
-use actix_web::{Scope, Responder, get, HttpResponse, web, guard};
-
-use super::auth::authorized;
+use actix_web::{Responder, get, HttpResponse, web, dev:: HttpServiceFactory};
+use actix_web_httpauth::middleware::HttpAuthentication;
+use crate::v1::auth::middleware::validator;
 
 mod user;
+mod payment;
 
 #[get("")]
 async fn root() -> impl Responder {
     HttpResponse::Ok().body("protected API is live!")
 }
 
-#[derive(Clone)]
-struct Authorized(String);
+pub fn endpoints() -> impl HttpServiceFactory {
 
-impl Authorized {
-    pub fn id(&self) -> &str {
-        &self.0
-    }
-}
-
-pub fn endpoints() -> Scope {
     web::scope("/protected")
-        .guard(guard::fn_guard(|context| {
-            let auth_user: Option<String> = authorized(&context);
-            match auth_user {
-                Some(user_id) => {
-                    context.req_data_mut().insert(Authorized(user_id));
-                    true
-                }
-                None => false,
-            }
-        }))
+        .wrap(HttpAuthentication::bearer(validator))
         .service(root)
         .service(user::endpoints())
+        .service(payment::endpoints())
 }

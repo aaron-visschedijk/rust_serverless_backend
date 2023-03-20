@@ -1,17 +1,18 @@
 mod jwt;
 mod models;
 mod password;
+pub mod middleware;
 
 use actix_easy_multipart::MultipartForm;
-use actix_web::guard::GuardContext;
+use actix_web::dev::HttpServiceFactory;
 use actix_web::web::Form;
-use actix_web::{web, Scope, Responder, HttpResponse, post};
+use actix_web::{web, Responder, HttpResponse, post};
 use rust_serverless_backend::dynamo::{Client, models::{User, RevokedToken}};
 use rust_serverless_backend::dynamo::tables::{USER_TABLE, REVOKED_TOKENS};
 
 
-#[post("/sign_up")]
-async fn sign_up(dynamo_client: web::Data<Client>, data: web::Json<models::SignUp>) -> impl Responder {
+#[post("/register")]
+async fn register(dynamo_client: web::Data<Client>, data: web::Json<models::SignUp>) -> impl Responder {
     if dynamo_client.exists(&USER_TABLE, "email", &data.email).await {
         return HttpResponse::BadRequest().body("Email already exists!");
     }
@@ -20,8 +21,8 @@ async fn sign_up(dynamo_client: web::Data<Client>, data: web::Json<models::SignU
     HttpResponse::Ok().body(format!("Succesfully created user: {:?}", user))
 }
 
-#[post("/sign_in")]
-async fn sign_in(dynamo_client: web::Data<Client>, data: MultipartForm<models::SignIn>) -> impl Responder {
+#[post("/login")]
+async fn login(dynamo_client: web::Data<Client>, data: MultipartForm<models::SignIn>) -> impl Responder {
     let user = dynamo_client.get(&USER_TABLE, "email", &data.email).await;
     match user {
         Some(user) if password::verify(&data.password, &user.password_hash) => {
@@ -53,8 +54,8 @@ async fn refresh(dynamo_client: web::Data<Client>, Form(refresh): Form<models::R
     HttpResponse::Ok().json(models::RefreshResponse {access_token, refresh_token})
 }
 
-#[post("/sign_out")]
-async fn sign_out(dynamo_client: web::Data<Client>, Form(refresh_token): Form<models::Refresh>) -> impl Responder {
+#[post("/logout")]
+async fn logout(dynamo_client: web::Data<Client>, Form(refresh_token): Form<models::Refresh>) -> impl Responder {
     let claims = jwt::verify_refresh_token(&refresh_token.refresh_token).ok();
     match claims {
         Some(claims) => {
@@ -66,18 +67,10 @@ async fn sign_out(dynamo_client: web::Data<Client>, Form(refresh_token): Form<mo
     }
 }
 
-pub fn authorized(ctx: &GuardContext) -> Option<String> {
-    let auth_header = ctx.head().headers().get("Authorization")?;
-    let header = auth_header.to_str().ok()?;
-    let token = header.strip_prefix("Bearer ")?;
-    let auth_user = jwt::verify_access_token(token).ok()?;
-    Some(auth_user.sub)
-}
-
-pub fn endpoints() -> Scope {
+pub fn endpoints() -> impl HttpServiceFactory {
     web::scope("/auth")
-        .service(sign_up)
-        .service(sign_in)
+        .service(register)
+        .service(login)
         .service(refresh)
-        .service(sign_out)
+        .service(logout)
 }

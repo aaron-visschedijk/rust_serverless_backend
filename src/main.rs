@@ -1,10 +1,12 @@
 use actix_cors::Cors;
-use actix_web::{http, middleware};
+use actix_web::middleware;
 use lambda_web::actix_web::{self, get, web, App, HttpServer, Responder};
 use lambda_web::{is_running_on_lambda, run_actix_on_lambda, LambdaError};
 use rust_serverless_backend::dynamo;
 
 mod v1;
+
+const STRIPE_KEY: &str = "sk_test_51KqIVpGM3GKkH0WVtkivAIQqRns9YooPjhhSM9uRaoUpTsCS8CeeTyR63tBhm59mYabSAxM9trEoBtkAGaoCHkg600tArEqshS";
 
 #[get("/")]
 async fn root() -> impl Responder {
@@ -14,7 +16,12 @@ async fn root() -> impl Responder {
 #[actix_web::main]
 async fn main() -> Result<(), LambdaError> {
     println!("Starting server...");
+
     let aws_config = aws_config::load_from_env().await;
+
+    std::env::set_var("RUST_LOG", "debug");
+    env_logger::init();
+
     let factory = move || {
         App::new()
             .wrap(
@@ -24,9 +31,9 @@ async fn main() -> Result<(), LambdaError> {
                     .allow_any_header()
                     .max_age(3600),
             )
-            .wrap(middleware::Logger::default())
             .wrap(middleware::NormalizePath::trim())
             .app_data(web::Data::new(dynamo::Client::new(&aws_config)))
+            .app_data(web::Data::new(stripe::Client::new(STRIPE_KEY)))
             .service(root)
             .service(v1::endpoints())
     };

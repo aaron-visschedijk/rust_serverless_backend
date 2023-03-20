@@ -2,7 +2,7 @@ use jsonwebtoken::{encode, Header, EncodingKey, errors::Error, DecodingKey, Vali
 use serde::{Serialize, Deserialize};
 use chrono::offset::Utc;
 
-const ACCESS_TOKEN_EXPIRATION: usize = 3600;
+const ACCESS_TOKEN_EXPIRATION: usize = 3600 * 2;
 const REFRESH_TOKEN_EXPIRATION: usize = 604800;
 const ACCESS_SIGNING_KEY: &str = "access_secret"; //replace this with better secret eventually
 const REFRESH_SIGNING_KEY: &str = "refresh_secret"; //replace this with better secret eventually

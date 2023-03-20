@@ -19,7 +19,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "lambda_bucket" {
-  bucket = "rust-serverless-backend-lambdas"
+  bucket = "rust-serverless-backend-lambda"
 }
 
 resource "aws_s3_bucket_acl" "lambda_bucket_acl" {

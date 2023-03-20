@@ -17,7 +17,7 @@ jobs:
       - name: Package Lambda and Requirements
         run: |
           pip install awscli
-          aws s3 sync --delete ./target/lambda/rust-serverless-backend s3://rust-serverless-backend-lambdas/${{ github.event.repository.name }}/
+          aws s3 sync --delete ./target/lambda/rust-serverless-backend s3://rust-serverless-backend-lambda/${{ github.event.repository.name }}/
       
   terraform:
     needs: upload-lambda

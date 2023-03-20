@@ -1,26 +1,13 @@
-name: Deploy Dev
 
-on: [push]
+name: deploy-dev
+on:
+  [push]
 
 jobs:
-  job1:
+  upload-lambda-package:
+    
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: echo
-        run: echo "${{ github.event.head_commit.modified }}"
-
-      # Add your job1 steps here
-
-  job2:
-    runs-on: ubuntu-latest
-    if: startsWith(github.event.head_commit, 'deploy/')
-    needs: job1
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
-      - name: echo
-        run: echo "job2 ran"
-
-      # Add your job2 steps here
+      - name: Package Lambda and Requirements
+        run: |
+          echo "${{ github.event_name }}"

@@ -16,7 +16,7 @@ jobs:
 
   job2:
     runs-on: ubuntu-latest
-    if: startsWith(github.event.head_commit.modified, 'rust_serverless_backend/deploy/')
+    if: startsWith(github.event.head_commit.modified, 'deploy/')
     needs: job1
     steps:
       - name: Checkout code

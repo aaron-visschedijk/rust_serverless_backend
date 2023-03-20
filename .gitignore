@@ -1,2 +1,8 @@
+# Rust build files
 target/*
 !target/lambda
+
+# Terraform
+.terraform.lock.hcl
+.terraform/
+vars.auto.tfvars

@@ -1,0 +1,31 @@
+name: Deploy Dev
+
+on:
+  push:
+    paths:
+      - 'rust_serverless_backend/target/lambda/rust_serverless_backend/**'
+      - 'rust_serverless_backend/deploy/**'
+
+jobs:
+  job1:
+    runs-on: ubuntu-latest
+    if: startsWith(github.event.head_commit.modified, 'rust_serverless_backend/target/lambda/rust_serverless_backend/')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: echo
+        run: echo "job1 ran"
+
+      # Add your job1 steps here
+
+  job2:
+    runs-on: ubuntu-latest
+    if: startsWith(github.event.head_commit.modified, 'rust_serverless_backend/deploy/')
+    needs: job1
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: echo
+        run: echo "job2 ran"
+
+      # Add your job2 steps here

@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct User {
-    pub user_id: String,
+    pub id: String,
     pub email: String,
     pub password_hash: String,
 }
@@ -12,7 +12,7 @@ pub struct User {
 impl User {
     pub fn new(email: String, password_hash: String) -> Self {
         User {
-            user_id: Uuid::new_v4().to_string(),
+            id: Uuid::new_v4().to_string(),
             email: email,
             password_hash: password_hash,
         }
@@ -21,6 +21,6 @@ impl User {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RevokedToken {
-    pub token: String,
+    pub jwt: String,
     pub exp: usize,
 }

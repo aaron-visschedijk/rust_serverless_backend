@@ -24,7 +24,7 @@ async fn create_customer(
     stripe: Data<stripe::Client>,
     auth_user: web::ReqData<Authorized>,
 ) -> impl Responder {
-    let user = dynamo.get(&USER_TABLE, "user_id", &auth_user.id).await.unwrap();
+    let user = dynamo.get(&USER_TABLE, "id", &auth_user.id).await.unwrap();
     let mut params = CreateCustomer::new();
     params.email = Some(&user.email);
     Customer::create(&stripe, params).await.unwrap();

@@ -26,8 +26,8 @@ async fn login(dynamo_client: web::Data<Client>, data: MultipartForm<models::Sig
     let user = dynamo_client.get(&USER_TABLE, "email", &data.email).await;
     match user {
         Some(user) if password::verify(&data.password, &user.password_hash) => {
-            let access_token = jwt::create_access_token(&user.user_id).unwrap();
-            let refresh_token = jwt::create_refresh_token(&user.user_id).unwrap();
+            let access_token = jwt::create_access_token(&user.id).unwrap();
+            let refresh_token = jwt::create_refresh_token(&user.id).unwrap();
             HttpResponse::Ok().json(models::SignInResponse {access_token, refresh_token})
         }
         _ => HttpResponse::BadRequest().body("Incorrect password or user does not exist!")
@@ -44,12 +44,13 @@ async fn refresh(dynamo_client: web::Data<Client>, Form(refresh): Form<models::R
         return HttpResponse::BadRequest().body("Invalid refresh token!");
     }
     let claims = claims.unwrap();
-    if dynamo_client.exists(&REVOKED_TOKENS, "user_id", &claims.sub).await {
+    if dynamo_client.exists(&REVOKED_TOKENS, "jwt", &refresh.refresh_token).await {
         return HttpResponse::BadRequest().body("Refresh token has been revoked!");
     }
     let access_token = jwt::create_access_token(&claims.sub).unwrap();
     let refresh_token = jwt::create_refresh_token(&claims.sub).unwrap();
-    let to_revoke = RevokedToken {token: refresh.refresh_token, exp: claims.exp};
+
+    let to_revoke = RevokedToken {jwt: refresh.refresh_token, exp: claims.exp};
     dynamo_client.put(&REVOKED_TOKENS, &to_revoke).await;
     HttpResponse::Ok().json(models::RefreshResponse {access_token, refresh_token})
 }
@@ -59,7 +60,7 @@ async fn logout(dynamo_client: web::Data<Client>, Form(refresh_token): Form<mode
     let claims = jwt::verify_refresh_token(&refresh_token.refresh_token).ok();
     match claims {
         Some(claims) => {
-            let to_revoke = RevokedToken {token: refresh_token.refresh_token, exp: claims.exp};
+            let to_revoke = RevokedToken {jwt: refresh_token.refresh_token, exp: claims.exp};
             dynamo_client.put(&REVOKED_TOKENS, &to_revoke).await;
             HttpResponse::Ok().json(models::SignOutResponse {access_token: "".to_string(), refresh_token: "".to_string()})
         }

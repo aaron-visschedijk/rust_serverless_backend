@@ -39,13 +39,9 @@ jobs:
         id: plan
         run: |
           cd deploy
-          terraform plan \
-          -var 'build_tag=${{ github.sha }}' \
-          -var 'project_name=${{ github.event.repository.name }}'
+          terraform plan
       - name: Terraform Apply
         id: apply
         run: |
           cd deploy
-          terraform apply -auto-approve \
-          -var 'build_tag=${{ github.sha }}' \
-          -var 'project_name=${{ github.event.repository.name }}'
+          terraform apply -auto-approve

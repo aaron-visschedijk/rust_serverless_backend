@@ -1,4 +1,5 @@
 use serde::{Serialize, Deserialize};
+use stripe::CustomerId;
 use uuid::Uuid;
 
 
@@ -6,15 +7,21 @@ use uuid::Uuid;
 pub struct User {
     pub id: String,
     pub email: String,
+    pub name: String,
     pub password_hash: String,
+    pub stripe_id: Option<CustomerId>,
+    pub email_verified: bool,
 }
 
 impl User {
-    pub fn new(email: String, password_hash: String) -> Self {
+    pub fn new(email: String, password_hash: String, name: String) -> Self {
         User {
+            name,
             id: Uuid::new_v4().to_string(),
-            email: email,
-            password_hash: password_hash,
+            email,
+            password_hash,
+            stripe_id: None,
+            email_verified: false,
         }
     }
 }

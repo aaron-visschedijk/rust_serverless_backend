@@ -7,7 +7,7 @@ mod payment;
 
 #[get("")]
 async fn root() -> impl Responder {
-    HttpResponse::Ok().body("protected API is live!")
+    HttpResponse::Ok().json("protected API is live!")
 }
 
 pub fn endpoints() -> impl HttpServiceFactory {

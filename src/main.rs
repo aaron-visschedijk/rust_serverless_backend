@@ -1,5 +1,5 @@
 use actix_cors::Cors;
-use actix_web::middleware;
+use actix_web::{middleware, HttpResponse};
 use lambda_web::actix_web::{self, get, web, App, HttpServer, Responder};
 use lambda_web::{is_running_on_lambda, run_actix_on_lambda, LambdaError};
 use rust_serverless_backend::dynamo;
@@ -10,7 +10,7 @@ const STRIPE_KEY: &str = "sk_test_51KqIVpGM3GKkH0WVtkivAIQqRns9YooPjhhSM9uRaoUpT
 
 #[get("/")]
 async fn root() -> impl Responder {
-    format!("Welcome to the Rust Serverless Backend!")
+    HttpResponse::Ok().json("Welcome to the Rust Serverless Backend!")
 }
 
 #[actix_web::main]

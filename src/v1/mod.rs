@@ -6,7 +6,7 @@ mod webhooks;
 
 #[get("")]
 async fn root() -> impl Responder {
-    HttpResponse::Ok().body("V1 API is live!")
+    HttpResponse::Ok().json("V1 API is live!")
 }
 
 pub fn endpoints() -> impl HttpServiceFactory {

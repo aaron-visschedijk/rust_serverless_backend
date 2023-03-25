@@ -2,9 +2,11 @@ use jsonwebtoken::{encode, Header, EncodingKey, errors::Error, DecodingKey, Vali
 use serde::{Serialize, Deserialize};
 use chrono::offset::Utc;
 
-const ACCESS_TOKEN_EXPIRATION: usize = 3600 * 2;
+const ACCESS_TOKEN_EXPIRATION: usize = 1800;
+const VERIFICATION_TOKEN_EXPIRATION: usize = 3600 * 24;
 const REFRESH_TOKEN_EXPIRATION: usize = 604800;
 const ACCESS_SIGNING_KEY: &str = "access_secret"; //replace this with better secret eventually
+const VERIFICATION_SIGNING_KEY: &str = "verification_secret"; //replace this with better secret eventually
 const REFRESH_SIGNING_KEY: &str = "refresh_secret"; //replace this with better secret eventually
 
 
@@ -46,6 +48,12 @@ pub fn create_refresh_token(subject: &str) -> Result<String, Error> {
     Ok(token)
 }
 
+pub fn create_verification_token(subject: &str) -> Result<String, Error> {
+    let claims = Claims::new(VERIFICATION_TOKEN_EXPIRATION, subject);
+    let token = claims.to_token(VERIFICATION_SIGNING_KEY)?;
+    Ok(token)
+}
+
 pub fn verify_access_token(token: &str) -> Result<Claims, Error> {
     let token = jsonwebtoken::decode::<Claims>(
         &token,
@@ -59,6 +67,15 @@ pub fn verify_refresh_token(token: &str) -> Result<Claims, Error> {
     let token = jsonwebtoken::decode::<Claims>(
         &token,
         &DecodingKey::from_secret(REFRESH_SIGNING_KEY.as_ref()),
+        &Validation::default()
+    )?;
+    Ok(token.claims)
+}
+
+pub fn verify_verification_token(token: &str) -> Result<Claims, Error> {
+    let token = jsonwebtoken::decode::<Claims>(
+        &token,
+        &DecodingKey::from_secret(VERIFICATION_SIGNING_KEY.as_ref()),
         &Validation::default()
     )?;
     Ok(token.claims)

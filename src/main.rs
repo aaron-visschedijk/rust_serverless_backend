@@ -6,8 +6,6 @@ use rust_serverless_backend::dynamo;
 
 mod v1;
 
-const STRIPE_KEY: &str = "sk_test_51KqIVpGM3GKkH0WVtkivAIQqRns9YooPjhhSM9uRaoUpTsCS8CeeTyR63tBhm59mYabSAxM9trEoBtkAGaoCHkg600tArEqshS";
-
 #[get("/")]
 async fn root() -> impl Responder {
     HttpResponse::Ok().json("Welcome to the Rust Serverless Backend!")
